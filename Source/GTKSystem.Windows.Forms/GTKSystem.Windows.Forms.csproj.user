@@ -14,7 +14,13 @@
     <Compile Update="GTKControls\CheckedListBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Update="GTKControls\Collection\BindingSource.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Update="GTKControls\ComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GTKControls\ListViewBase\ColumnHeader.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Update="GTKControls\DataGridView.cs">
@@ -23,10 +29,34 @@
     <Compile Update="GTKControls\DateTimePicker.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Update="GTKControls\EventArgs\Control.PrintPaintEventArgs.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GTKControls\FlowLayoutPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Update="GTKControls\Form.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="GTKControls\GroupBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GTKControls\Interface\ContainerControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GTKControls\Interface\Control.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GTKControls\Interface\ListControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GTKControls\Interface\ScrollableControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GTKControls\Interface\WidgetContainerControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GTKControls\Interface\WidgetControl.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Update="GTKControls\Label.cs">
@@ -35,10 +65,31 @@
     <Compile Update="GTKControls\LinkLabel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Update="GTKControls\ListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GTKControls\ListView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GTKControls\ListViewBase\ImageList.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Update="GTKControls\MaskedTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Update="GTKControls\MenuStrip.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GTKControls\MenuStripBase\ContextMenuStrip.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GTKControls\MenuStripBase\ToolStrip.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GTKControls\MenuStripBase\ToolStripDropDown.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GTKControls\MenuStripBase\ToolStripDropDownMenu.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Update="GTKControls\MonthCalendar.cs">
@@ -68,10 +119,19 @@
     <Compile Update="GTKControls\TabControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Update="GTKControls\TabControlBase\TabPage.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GTKControls\TableLayoutPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Update="GTKControls\TextBox.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Update="GTKControls\TreeView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="GTKControls\UserControl.cs">
       <SubType>Component</SubType>
     </Compile>
   </ItemGroup>

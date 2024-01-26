@@ -1,13 +1,18 @@
-﻿//基于GTK3.24.24.34版本组件开发，兼容原生C#控件winform界面的跨平台界面组件。
-//使用本组件GTKSystem.Windows.Forms代替Microsoft.WindowsDesktop.App.WindowsForms，一次编译，跨平台windows和linux运行
-//技术支持438865652@qq.com，https://www.cnblogs.com/easywebfactory
+﻿/*
+ * 基于GTK3.24.24.34版本组件开发，兼容原生C#控件winform界面的跨平台界面组件。
+ * 使用本组件GTKSystem.Windows.Forms代替Microsoft.WindowsDesktop.App.WindowsForms，一次编译，跨平台跨平台windows、linux、macos运行
+ * 技术支持438865652@qq.com，https://gitee.com/easywebfactory, https://www.cnblogs.com/easywebfactory
+ * author:chenhongjin
+ * date: 2024/1/3
+ */
+using GLib;
+using Gtk;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
-using System.Reflection;
-
 
 namespace System.Windows.Forms
 {
@@ -21,6 +26,19 @@ namespace System.Windows.Forms
             Widget.StyleContext.AddClass("TabControl");
             _controls = new ControlCollection(this);
             _tabPageControls = new TabPageCollection(this);
+            base.Control.Realized += Control_Realized;
+        }
+
+        private void Control_Realized(object sender, EventArgs e)
+        {
+             if(SizeMode == TabSizeMode.Fixed)
+            {
+                foreach(TabPage page in _tabPageControls)
+                {
+                    page._tabLabel.WidthRequest = this.ItemSize.Width;
+                    page._tabLabel.HeightRequest = this.ItemSize.Height;
+                }
+            }
         }
 
         public int SelectedIndex { get { return base.Control.CurrentPage; } set { base.Control.CurrentPage = value; } }
@@ -28,17 +46,32 @@ namespace System.Windows.Forms
         public TabPage SelectedTab { get { return _controls[base.Control.CurrentPage]; } set { } }
 
         public TabSizeMode SizeMode { get; set; }
-
+        public TabDrawMode DrawMode { get; set; }
         public bool ShowToolTips { get; set; }
-
-        public int TabCount { get; }
+        public Size ItemSize { get; set; }
+        public int TabCount { get => base.Control.NPages; }
         public TabPageCollection TabPages { get { return _tabPageControls; } }
+        public Rectangle GetTabRect(int index)
+        {
+            if (index < 0 || (index >= TabCount))
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), index, "SR.InvalidArgument");
+            }
+            TabPage page = TabPages[index];
+            Gtk.Label tab = page.TabLabel;
+            Gdk.Rectangle rect = tab.Allocation;
+            return new Rectangle(0, 0, rect.Width, rect.Height);
+        }
+
         public new TabControl.ControlCollection Controls => _controls;
         public event EventHandler SelectedIndexChanged
         {
-            add { base.Control.SwitchPage += (object sender, Gtk.SwitchPageArgs e) => { if (base.Control.IsRealized) { value.Invoke(sender, e); } }; }
-            remove { base.Control.SwitchPage -= (object sender, Gtk.SwitchPageArgs e) => { if (base.Control.IsRealized) { value.Invoke(sender, e); } }; }
+            add { base.Control.SwitchPage += (object sender, Gtk.SwitchPageArgs e) => { if (base.Control.IsRealized) { value.Invoke(this, e); } }; }
+            remove { base.Control.SwitchPage -= (object sender, Gtk.SwitchPageArgs e) => { if (base.Control.IsRealized) { value.Invoke(this, e); } }; }
         }
+
+        public event DrawItemEventHandler DrawItem;
+
         public class ControlCollection : List<TabPage>
         {
             TabControl _owner;
@@ -48,7 +81,23 @@ namespace System.Windows.Forms
             }
             public new int Add(TabPage item)
             {
+                item.Parent = _owner;
+                item.TabLabel.Name = base.Count.ToString();
                 base.Add(item);
+                item.TabLabel.Drawn += (object sender, DrawnArgs args) =>
+                {
+                    if (_owner.DrawMode == TabDrawMode.OwnerDrawFixed && _owner.DrawItem != null)
+                    {
+                        Gtk.Label tab = (Gtk.Label)sender;
+                        tab.GetAllocatedSize(out Gdk.Rectangle allocation, out int baseline);
+                        args.Cr.ResetClip();
+                        int width = allocation.Width + 24;
+                        int height = allocation.Height + 2;
+                       // _owner.DrawItem(this, new DrawItemEventArgs(new Graphics(tab, args.Cr, new Gdk.Rectangle(0, 0, width, height)), _owner.Font, new Rectangle(-12, -2, width, height), Convert.ToInt32(tab.Name), DrawItemState.Default));
+                        _owner.DrawItem(this, new DrawItemEventArgs(new Graphics(tab, args.Cr, new Gdk.Rectangle(0, 0, width, height)) { diff_left=-12, diff_top=-2 }, _owner.Font, new Rectangle(0, 0, width, height), Convert.ToInt32(tab.Name), DrawItemState.Default));
+
+                    }
+                };
                 return _owner.Control.AppendPage(item.Control, item.TabLabel);
             }
             public new void RemoveAt(int index)
@@ -88,29 +137,30 @@ namespace System.Windows.Forms
 
             object ICollection.SyncRoot => throw new NotImplementedException();
 
-            public void Add(string? key, string? text, string imageKey)
+            public void Add(string key, string text, string imageKey)
             {
                 TabPage tp = new TabPage();
                 tp.Name = key;
                 tp.Text = text;
-                _owner.Controls.Add(tp);
+                this.Add(tp);
             }
 
             public void Add(TabPage value)
             {
+                value.Parent = _owner;
                 _owner.Controls.Add(value);
             }
-            public void Add(string? key, string? text)
+            public void Add(string key, string text)
             {
                 this.Add(key, text, null);
             }
 
-            public void Add(string? text)
+            public void Add(string text)
             {
                 this.Add($"tabPage{Count}", text, null);
             }
 
-            public void Add(string? key, string? text, int imageIndex)
+            public void Add(string key, string text, int imageIndex)
             {
                 this.Add(key, text, null);
             }
@@ -151,7 +201,7 @@ namespace System.Windows.Forms
                 return _owner.Controls.Contains(page);
             }
 
-            public virtual bool ContainsKey(string? key)
+            public virtual bool ContainsKey(string key)
             {
                 return _owner.Controls.FindIndex(p => p.Name == key) > -1;
 
@@ -167,17 +217,17 @@ namespace System.Windows.Forms
                 return _owner.Controls.IndexOf(page);
             }
 
-            public virtual int IndexOfKey(string? key)
+            public virtual int IndexOfKey(string key)
             {
                 return _owner.Controls.FindIndex(p => p.Name == key);
             }
 
-            public void Insert(int index, string? key, string? text, int imageIndex)
+            public void Insert(int index, string key, string text, int imageIndex)
             {
                 _owner.Controls.Insert(index, new TabPage() { Name = key, Text = text }); ;
             }
 
-            public void Insert(int index, string? key, string? text)
+            public void Insert(int index, string key, string text)
             {
                 Insert(index, key, text, -1);
             }
@@ -187,12 +237,12 @@ namespace System.Windows.Forms
                 _owner.Controls.Insert(index, tabPage);
             }
 
-            public void Insert(int index, string? key, string? text, string imageKey)
+            public void Insert(int index, string key, string text, string imageKey)
             {
                 Insert(index, key, text, -1);
             }
 
-            public void Insert(int index, string? text)
+            public void Insert(int index, string text)
             {
                 Insert(index, $"tabPage{Count}", text, -1);
             }
@@ -212,7 +262,7 @@ namespace System.Windows.Forms
                 _owner.Controls.RemoveAt(index);
             }
 
-            public virtual void RemoveByKey(string? key)
+            public virtual void RemoveByKey(string key)
             {
                 _owner.Controls.RemoveAt(_owner.Controls.FindIndex(p => p.Name == key));
             }
