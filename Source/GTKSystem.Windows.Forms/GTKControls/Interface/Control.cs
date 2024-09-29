@@ -1,10 +1,11 @@
-﻿using Gtk;
-using GTKSystem.Windows.Forms.GTKControls.ControlBase;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms.Design;
+using Gtk;
+using GTKSystem.Windows.Forms.GTKControls.ControlBase;
 
 namespace System.Windows.Forms
 {
@@ -182,17 +183,17 @@ namespace System.Windows.Forms
         }
         private void Widget_KeyPressEvent(object o, Gtk.KeyPressEventArgs args)
         {
-            if (KeyDown != null)
+            if (args.Event is Gdk.EventKey eventkey)
             {
-                if (args.Event is Gdk.EventKey eventkey)
-                {
-                    Keys keys = (Keys)eventkey.HardwareKeycode;
+                Keys keys = (Keys)eventkey.HardwareKeycode;
+                _lstModifierKeys.Add(keys);
+                if (KeyDown != null)
                     KeyDown(this, new KeyEventArgs(keys));
-                }
             }
         }
         private void Widget_KeyReleaseEvent(object o, KeyReleaseEventArgs args)
         {
+            _lstModifierKeys.Clear();
             if (KeyUp != null)
             {
                 Keys keys = (Keys)args.Event.HardwareKeycode;
@@ -1339,6 +1340,29 @@ namespace System.Windows.Forms
         protected virtual void WndProc(ref Message m)
         {
             //Console.WriteLine($"HWnd:{m.HWnd},WParam:{m.WParam},LParam:{m.LParam},Msg:{m.Msg}");
+        }
+
+        private static List<Keys> _lstModifierKeys = new();
+        /// <summary>
+        ///  获取一个表示哪个修改键（Shift、Control 和 Alt）处于按下状态的值。
+        /// </summary>
+        public static Keys ModifierKeys
+        {
+            get
+            {
+                Keys keys = Keys.None;
+
+                if (_lstModifierKeys.Contains(Keys.ShiftKey) || _lstModifierKeys.Contains(Keys.RShiftKey))
+                    keys |= Keys.Shift;
+
+                if (_lstModifierKeys.Contains(Keys.ControlKey) || _lstModifierKeys.Contains(Keys.RControlKey))
+                    keys |= Keys.Control;
+
+                if (_lstModifierKeys.Contains(Keys.Menu) || _lstModifierKeys.Contains(Keys.RMenu))
+                    keys |= Keys.Alt;
+
+                return keys;
+            }
         }
     }
 }
