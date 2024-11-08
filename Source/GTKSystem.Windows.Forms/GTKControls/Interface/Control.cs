@@ -888,7 +888,8 @@ namespace System.Windows.Forms
 
         public virtual void BringToFront()
         {
-
+            if (this.Widget.Parent is Gtk.Overlay parent)
+                parent.ReorderOverlay(this.Widget, -1);
         }
 
         public virtual bool Contains(Control ctl)
@@ -1260,7 +1261,8 @@ namespace System.Windows.Forms
 
         public virtual void SendToBack()
         {
-
+            if (this.Widget.Parent is Gtk.Overlay parent)
+                parent.ReorderOverlay(this.Widget, 0);
         }
 
         public virtual void SetBounds(int x, int y, int width, int height)
